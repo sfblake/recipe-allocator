@@ -29,6 +29,10 @@ def assign_recipes(stock_count, customers, portion_count, recipe_count):
         Remaining stock levels.
     """
 
+    # Not enough unique recipes to assign any
+    if len(stock_count) < recipe_count:
+        return customers, stock_count
+
     # Iterate through customers
     for leftover in range(customers, 0, -1):
         # Get the recipes with the most stock remaining
