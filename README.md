@@ -57,7 +57,7 @@ True
 **recipe-allocator** is an algorithm for determining whether a set of
 orders can be fulfilled by a set of stock levels. 
 
-The stock is the number of unique recipes, each of which
+The stock is a number of unique recipes, each of which
 have a certain number of units in stock and can be
 either vegetarian or gourmet.
 
@@ -148,9 +148,9 @@ _vegetarian_, _two_recipes_, _four_portions_
 _gourmet_, _four_recipes_, _four_portions_  
 _gourmet_, _three_recipes_, _four_portions_  
 
-### Potential risks
-The algorithm is designed to handle any numbers of recipes in stock,
-and anywhere between 1 and 5 recipes and portions for a customer 
+### Remarks and risks
+The algorithm is designed to handle any number of recipes in stock,
+and anywhere between 1 and 5 recipes and portions per customer 
 (this requires a string to int conversion for the specified data
 format, hence the fixed range). Only the default options of {2,4}
 portions and {2,3,4} recipes are covered by the test cases however.
@@ -163,7 +163,7 @@ population) gives an upper run time of 7.5 minutes for the current
 implementation.
 
 Although the algorithm is designed to return only `True` or `False`
-when the orders can and cannot be met, it could also be used to
+when the orders can and cannot be met, it could also be repurposed to
 determine which recipes customers should be given - this is already
 calculated as part of the algorithm's operation. However I would
 advise against this. Because of the order in which the different
@@ -172,4 +172,4 @@ different kinds of recipes: two portion gourmet customers would
 receive a higher proportion of vegetarian recipes than four portion 
 gourmet customers, for example. Some shuffling of recipes between
 customers would be necessary to make the distribution of recipes more
-random before the algorithm's recommendations could be used.
+random before the algorithm's recommendations are used.
