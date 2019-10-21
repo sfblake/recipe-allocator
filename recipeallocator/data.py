@@ -34,7 +34,6 @@ def generate_data(customer_lims=(10, 100), num_veg=8, num_gourmet=22, extra_stoc
     portion_count = ["two_portions", "four_portions"]
 
     assert num_veg >= 4, "Not enough vegetarian recipes"
-    assert num_gourmet >= 4, "Not enough gourmet recipes"
 
     # Generate random orders
     orders = {}

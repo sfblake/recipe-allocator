@@ -5,6 +5,7 @@ The recipe allocation algorithm.
 from .utils import *
 import numpy as np
 import pandas as pd
+import json
 
 
 def assign_recipes(stock_count, customers, portion_count, recipe_count):
@@ -20,7 +21,7 @@ def assign_recipes(stock_count, customers, portion_count, recipe_count):
     portion_count : int
         Number of portions for these customers.
     recipe_count : int
-        Number of recipes for these customers
+        Number of recipes for these customers.
     Returns
     ----------
     leftover : int
@@ -116,3 +117,25 @@ def satisfy_order(stock, orders):
                 stock_count = stock_count_all
 
     return True
+
+
+def satisfy_order_json(stock_file, orders_file):
+    """
+    Determine whether stocked recipes can satisfy orders, from json data.
+
+    Parameters
+    ----------
+    stock_file : str
+        Path to json stock file.
+    orders_file : str
+        Path to json orders file.
+    Returns
+    ----------
+    bool
+        True if stock can satisfy the orders, False if not.
+    """
+
+    stock = json.load(open(stock_file, "rb"))
+    orders = json.load(open(orders_file, "rb"))
+
+    return satisfy_order(stock, orders)
