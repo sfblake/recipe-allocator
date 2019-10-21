@@ -6,6 +6,8 @@ from .utils import *
 import numpy as np
 import pandas as pd
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 
 def assign_recipes(stock_count, customers, portion_count, recipe_count):
@@ -30,6 +32,7 @@ def assign_recipes(stock_count, customers, portion_count, recipe_count):
         Remaining stock levels.
     """
 
+    logger.debug("Starting stock levels: {}".format(stock_count))
     # Not enough unique recipes to assign any
     if len(stock_count) < recipe_count:
         return customers, stock_count
@@ -44,8 +47,12 @@ def assign_recipes(stock_count, customers, portion_count, recipe_count):
         if stock_count.min() < 0:
             # Add the subtracted stock back on
             stock_count[most_stock] = stock_count[most_stock] + portion_count
+            logger.debug("Final stock levels: {}".format(stock_count))
+            logger.debug("{} leftover".format(leftover))
             return leftover, stock_count
 
+    logger.debug("Final stock levels: {}".format(stock_count))
+    logger.debug("{} leftover".format(0))
     return 0, stock_count
 
 
@@ -75,6 +82,7 @@ def satisfy_order(stock, orders):
 
     # If demand is greater than stock, then demand cannot be satisfied
     if total_demand > total_stock:
+        logger.info("Demand {} is greater than stock {}, stopping".format(total_demand, total_stock))
         return False
 
     stock_count = stockDF["stock_count"].values.copy()
@@ -84,7 +92,13 @@ def satisfy_order(stock, orders):
     orderDF.sort_values(["portion_count", "box_type", "recipe_count"], ascending=False, inplace=True)
 
     # Assign orders for each customer subset
-    for _, order in orderDF.sort_values(["portion_count", "recipe_count"], ascending=False).iterrows():
+    for _, order in orderDF.iterrows():
+
+        # Log progress
+        log_str = "Assigning recipes for "
+        for k in ["customers", "portion_count", "box_type", "recipe_count"]:
+            log_str += "{} {}, ".format(order[k], k)
+        logger.info(log_str[:-2])
 
         if order["box_type"] == "vegetarian":
             # Vegetarian orders only
@@ -93,6 +107,7 @@ def satisfy_order(stock, orders):
                                                        order["portion_count"], order["recipe_count"])
             if leftover > 0:
                 # Orders cannot be satisfied
+                logger.info("{} order(s) leftover, stopping".format(leftover))
                 return False
             # Update stock
             stock_count[veg_mask] = stock_count_veg
@@ -106,16 +121,19 @@ def satisfy_order(stock, orders):
             stock_count[~veg_mask] = stock_count_nonveg
 
             if leftover > 0:
+                logger.debug("Adding vegetarian recipes".format(leftover))
                 # Try gourmet and non-veg recipes for remaining customers
                 stock_count_all = stock_count.copy()
                 leftover, stock_count_all = assign_recipes(stock_count_all, leftover,
                                                            order["portion_count"], order["recipe_count"])
                 if leftover > 0:
                     # Orders cannot be satisfied
+                    logger.info("{} order(s) leftover, stopping".format(leftover))
                     return False
                 # Update stock
                 stock_count = stock_count_all
 
+    logger.info("All orders satisfied, stopping")
     return True
 
 
@@ -136,6 +154,9 @@ def satisfy_order_json(stock_file, orders_file):
     """
 
     stock = json.load(open(stock_file, "rb"))
+    logger.info("Loaded {}".format(stock_file))
+
     orders = json.load(open(orders_file, "rb"))
+    logger.info("Loaded {}".format(orders_file))
 
     return satisfy_order(stock, orders)
